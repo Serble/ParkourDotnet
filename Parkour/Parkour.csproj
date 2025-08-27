@@ -5,6 +5,13 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageId>MinecraftDotnet.Game.Parkour</PackageId>
+        <Title>Parkour</Title>
+        <Authors>CoPokBl</Authors>
+        <Description>A Parkour gamemode written with MinecraftDotnet.</Description>
+        <PackageProjectUrl>https://github.com/Serble/ParkourDotnet</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Serble/ParkourDotnet.git</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>
