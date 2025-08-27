@@ -21,6 +21,7 @@ public class ParkourItemsFeature(ParkourGame game) : ScopedFeature {
             // give item
             e.Player.Inventory.AddItem(RespawnItem);
             e.Player.Inventory.AddItem(RestartItem);
+            e.Player.Inventory.AddItem(LeaveItem);
         });
 
         game.World.Events.AddListener<PlayerUseItemEvent>(e => {
