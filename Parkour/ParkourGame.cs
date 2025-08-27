@@ -63,6 +63,11 @@ public class ParkourGame(ParkourMap map) {
             if (e.Entity is not PlayerEntity player) {
                 return;
             }
+
+            if (player.Position.Y < World.Dimension.MinY) {
+                Respawn(player);
+                return;  // We can't get blocks if they are too low
+            }
             
             if (!World.IsBlockLoaded(player.Position.ToBlockPos())) {
                 return;  // don't do anything if the chunk isn't loaded
@@ -98,7 +103,7 @@ public class ParkourGame(ParkourMap map) {
             }
             
             // death check
-            bool dead = player.Position.Y < World.Dimension.MinY;
+            bool dead = player.Position.Y < World.Dimension.MinY + 10;
             if (!dead) foreach (Vec3<int> block in GetPlayerCollidingBlocks(player)) {
                 IBlock type = World.GetBlock(block);
                 if (map.DeathBlocks.Contains(type.Identifier)) {
