@@ -2,6 +2,7 @@ using System.Diagnostics;
 using ManagedServer;
 using ManagedServer.Entities.Types;
 using ManagedServer.Events;
+using ManagedServer.Features;
 using ManagedServer.Viewables;
 using ManagedServer.Worlds;
 using Minecraft;
@@ -32,6 +33,7 @@ public class ParkourGame(ParkourMap map) {
     
     public World Initialise(ManagedMinecraftServer server) {
         World = server.CreateWorld(map.Map);
+        World.AddFeature(new ParkourItemsFeature(this));
 
         World.Events.AddListener<PlayerEnteringWorldEvent>(e => {
             e.Player.Teleport(map.Spawn with {
@@ -91,34 +93,7 @@ public class ParkourGame(ParkourMap map) {
                 }
 
                 if (gotCheckpoint) {
-                    player.SetTag(CheckpointTag, currentCheckpoint + 1);
-                    if (currentCheckpoint + 2 == map.Checkpoints.Length) {
-                        player.SendMessage(TextComponent.FromLegacyString("&aYou have completed the parkour!"));
-                        player.PlaySound(SoundType.PlayerLevelup, player);
-
-                        if (player.HasTag(TimerTag)) {
-                            player.GetTag(TimerTag).Stop();
-                        }
-
-                        ParkourFinishedEvent finishEvent = new() {
-                            Player = player,
-                            World = player.World.ThrowIfNull(),
-                            Game = this
-                        };
-                        World.Events.CallEvent(finishEvent);
-                    }
-                    else {
-                        player.SendMessage(TextComponent.FromLegacyString($"&aCheckpoint &6{currentCheckpoint + 1}&a reached!"));
-                        player.PlaySound(SoundType.ExperienceOrbPickup, player);
-                    }
-                    
-                    ParkourCheckpointEvent checkpointEvent = new() {
-                        Player = player,
-                        World = player.World.ThrowIfNull(),
-                        Game = this,
-                        Checkpoint = currentCheckpoint + 1
-                    };
-                    World.Events.CallEvent(checkpointEvent);
+                    Checkpoint(player, currentCheckpoint + 1);
                 }
             }
             
@@ -133,20 +108,7 @@ public class ParkourGame(ParkourMap map) {
             }
 
             if (dead) {
-                ParkourPos respawnPos = map.Checkpoints[currentCheckpoint][0];
-                player.Teleport(respawnPos.Pos.BlockPosToDouble(), Angle.FromDegrees(respawnPos.Yaw), Angle.Zero);
-
-                if (currentCheckpoint == 0) {
-                    player.RemoveTag(TimerTag);
-                }
-                
-                ParkourRespawnEvent respawnEvent = new() {
-                    Player = player,
-                    World = player.World.ThrowIfNull(),
-                    Game = this,
-                    Checkpoint = currentCheckpoint
-                };
-                World.Events.CallEvent(respawnEvent);
+                Respawn(player);
                 return;
             }
             
@@ -167,6 +129,63 @@ public class ParkourGame(ParkourMap map) {
         });
         
         return World;
+    }
+
+    public void Checkpoint(PlayerEntity player, int checkpoint) {
+        player.SetTag(CheckpointTag, checkpoint);
+        if (checkpoint + 1 == map.Checkpoints.Length) {
+            player.SendMessage(TextComponent.FromLegacyString("&aYou have completed the parkour!"));
+            player.PlaySound(SoundType.PlayerLevelup, player);
+
+            if (player.HasTag(TimerTag)) {
+                player.GetTag(TimerTag).Stop();
+            }
+
+            ParkourFinishedEvent finishEvent = new() {
+                Player = player,
+                World = player.World.ThrowIfNull(),
+                Game = this
+            };
+            World.Events.CallEvent(finishEvent);
+        }
+        else {
+            player.SendMessage(TextComponent.FromLegacyString($"&aCheckpoint &6{checkpoint}&a reached!"));
+            player.SendTitle(TextComponent.Text(""), TextComponent.FromLegacyString($"&aCheckpoint &6{checkpoint} &areached!"));
+            player.PlaySound(SoundType.ExperienceOrbPickup, player);
+        }
+                    
+        ParkourCheckpointEvent checkpointEvent = new() {
+            Player = player,
+            World = player.World.ThrowIfNull(),
+            Game = this,
+            Checkpoint = checkpoint
+        };
+        World.Events.CallEvent(checkpointEvent);
+    }
+
+    public void Respawn(PlayerEntity player, int currentCheckpoint = -1) {
+        if (currentCheckpoint == -1) {
+            currentCheckpoint = player.GetTagOrDefault(CheckpointTag, 0);
+        }
+        ParkourPos respawnPos = map.Checkpoints[currentCheckpoint][0];
+        player.Teleport(respawnPos.Pos.BlockPosToDouble(), Angle.FromDegrees(respawnPos.Yaw), Angle.Zero);
+
+        if (currentCheckpoint == 0) {
+            player.RemoveTag(TimerTag);
+        }
+                
+        ParkourRespawnEvent respawnEvent = new() {
+            Player = player,
+            World = player.World.ThrowIfNull(),
+            Game = this,
+            Checkpoint = currentCheckpoint
+        };
+        World.Events.CallEvent(respawnEvent);
+    }
+
+    public void Reset(PlayerEntity player) {
+        player.SetTag(CheckpointTag, 0);
+        Respawn(player);
     }
     
     private static Vec3<int>[] GetPlayerCollidingBlocks(PlayerEntity player) {
