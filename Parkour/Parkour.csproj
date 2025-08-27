@@ -12,6 +12,7 @@
         <Description>A Parkour gamemode written with MinecraftDotnet.</Description>
         <PackageProjectUrl>https://github.com/Serble/ParkourDotnet</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Serble/ParkourDotnet.git</RepositoryUrl>
+        <Version>1.0.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
