@@ -24,6 +24,26 @@ ParkourMap map = new(terrain, false, [
     new ParkourPos(new Vec3<int>(0, 32, 0))
 ]);
 
+// var othermap = () => new ParkourMap(terrain, false, [
+//     Block.Lava.Identifier
+// ], [
+//     new ParkourPos(new Vec3<int>(6, 32, 107)),
+//     new ParkourPos(new Vec3<int>(13, 37, 106), 180),
+//     new ParkourPos(new Vec3<int>(6, 50, 84)),
+//     new ParkourPos(new Vec3<int>(6, 58, 111)),
+//     new ParkourPos(new Vec3<int>(6, 58, 133), -90),
+//     new ParkourPos(new Vec3<int>(23, 57, 133), -90),
+//     new ParkourPos(new Vec3<int>(45, 47, 133), -90),
+//     new ParkourPos(new Vec3<int>(57, 46, 113), 180),
+//     [
+//         new ParkourPos(new Vec3<int>(57, 44, 92), 180),
+//         new ParkourPos(new Vec3<int>(58, 44, 92), 180)
+//     ],
+//     new ParkourPos(new Vec3<int>(31, 30, 61), 90),
+//     new ParkourPos(new Vec3<int>(31, 30, 106)),
+//     new ParkourPos(new Vec3<int>(24, 45, 169))
+// ]);
+
 ParkourGame game = new(map);
 game.Initialise(server);
 

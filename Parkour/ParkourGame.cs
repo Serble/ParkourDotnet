@@ -34,7 +34,9 @@ public class ParkourGame(ParkourMap map) {
         World = server.CreateWorld(map.Map);
 
         World.Events.AddListener<PlayerEnteringWorldEvent>(e => {
-            e.Player.Teleport(map.Spawn);
+            e.Player.Teleport(map.Spawn with {
+                Position = map.Spawn.Position + new Vec3<double>(0, 2, 0)
+            });
             e.Player.GameMode = map.BlockPlacing ? GameMode.Survival : GameMode.Adventure;
             
             e.Player.SendPacket(new ClientBoundUpdateTagsPacket {
@@ -121,8 +123,8 @@ public class ParkourGame(ParkourMap map) {
             }
             
             // death check
-            bool dead = false;
-            foreach (Vec3<int> block in GetPlayerCollidingBlocks(player)) {
+            bool dead = player.Position.Y < World.Dimension.MinY;
+            if (!dead) foreach (Vec3<int> block in GetPlayerCollidingBlocks(player)) {
                 IBlock type = World.GetBlock(block);
                 if (map.DeathBlocks.Contains(type.Identifier)) {
                     dead = true;
