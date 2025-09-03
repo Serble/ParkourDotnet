@@ -22,12 +22,6 @@ public class ParkourGame(ParkourMap map) {
     private static readonly Tag<int> CheckpointTag = new("parkour:current_checkpoint");
     private static readonly Tag<DateTime> JumpPadCooldownTag = new("parkour:jump_pad_cooldown");
     private static readonly Tag<Stopwatch> TimerTag = new("parkour:timer");
-
-    private static readonly int[] ClimbableBlocks = [
-        Block.Ladder.ProtocolId,
-        Block.Scaffolding.ProtocolId,
-        Block.Vine.ProtocolId
-    ];
     
     public World World { get; private set; } = null!;
     
@@ -35,16 +29,19 @@ public class ParkourGame(ParkourMap map) {
         World = server.CreateWorld(map.Map);
         World.AddFeature(new ParkourItemsFeature(this));
 
+        int[] climbableBlockIds = VanillaTags.BlockClimbable
+            .Select(b => VanillaRegistry.Data.Blocks[b].ProtocolId)
+            .ToArray();
+
         World.Events.AddListener<PlayerEnteringWorldEvent>(e => {
             e.Player.Teleport(map.Spawn with {
                 Position = map.Spawn.Position + new Vec3<double>(0, 2, 0)
             });
             e.Player.GameMode = map.BlockPlacing ? GameMode.Survival : GameMode.Adventure;
-            
             e.Player.SendPacket(new ClientBoundUpdateTagsPacket {
                 Tags = [
                     new ClientBoundUpdateTagsPacket.TagSet("block", [
-                        new ClientBoundUpdateTagsPacket.Tag("climbable", ClimbableBlocks)
+                        new ClientBoundUpdateTagsPacket.Tag("climbable", climbableBlockIds)
                     ])
                 ]
             });
@@ -120,7 +117,7 @@ public class ParkourGame(ParkourMap map) {
             // jump pad check
             IBlock blockBelow = World.GetBlock(player.Position - new Vec3<double>(0, 0.1, 0));
             if (blockBelow.Equals(Block.EmeraldBlock) && player.GetTagOrDefault(JumpPadCooldownTag, DateTime.MinValue) < DateTime.UtcNow) {
-                player.SetVelocity(new Vec3<double>(0, 1.1, 0));
+                player.SetVelocity(new Vec3<double>(0, 1.19, 0));
                 player.SetTag(JumpPadCooldownTag, DateTime.UtcNow.AddSeconds(5D/20D));  // 5 ticks
                 
                 JumpPadEvent jumpPadEvent = new() {
