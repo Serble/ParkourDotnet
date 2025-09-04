@@ -8,6 +8,7 @@ public class ParkourCheckpointEvent : IParkourEvent, IPlayerEvent {
     public required PlayerEntity Player { get; init; }
     public required ParkourGame Game { get; init; }
     public required int Checkpoint { get; init; }
+    public required TimeSpan Time { get; init; }
 
     public World World {
         get => Game.World;

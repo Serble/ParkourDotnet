@@ -146,7 +146,8 @@ public class ParkourGame(ParkourMap map) {
             ParkourFinishedEvent finishEvent = new() {
                 Player = player,
                 World = player.World.ThrowIfNull(),
-                Game = this
+                Game = this,
+                Time = player.GetTagOrDefault(TimerTag, new Stopwatch()).Elapsed
             };
             World.Events.CallEvent(finishEvent);
         }
@@ -160,7 +161,8 @@ public class ParkourGame(ParkourMap map) {
             Player = player,
             World = player.World.ThrowIfNull(),
             Game = this,
-            Checkpoint = checkpoint
+            Checkpoint = checkpoint,
+            Time = player.GetTagOrDefault(TimerTag, new Stopwatch()).Elapsed
         };
         World.Events.CallEvent(checkpointEvent);
     }
