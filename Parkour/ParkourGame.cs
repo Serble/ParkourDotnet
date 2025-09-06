@@ -61,12 +61,12 @@ public class ParkourGame(ParkourMap map) {
                 return;
             }
 
-            if (player.Position.Y < World.Dimension.MinY) {
+            if (e.NewPos.Y < World.Dimension.MinY) {
                 Respawn(player);
                 return;  // We can't get blocks if they are too low
             }
             
-            if (!World.IsBlockLoaded(player.Position.ToBlockPos())) {
+            if (!World.IsBlockLoaded(e.NewPos.ToBlockPos())) {
                 return;  // don't do anything if the chunk isn't loaded
             }
 
@@ -100,11 +100,12 @@ public class ParkourGame(ParkourMap map) {
             }
             
             // death check
-            bool dead = player.Position.Y < World.Dimension.MinY + 10;
-            if (!dead) foreach (Vec3<int> block in GetPlayerCollidingBlocks(player)) {
+            bool dead = e.NewPos.Y < World.Dimension.MinY + 10;
+            if (!dead) foreach (Vec3<int> block in GetPlayerCollidingBlocks(player, e.NewPos)) {
                 IBlock type = World.GetBlock(block);
                 if (map.DeathBlocks.Contains(type.Identifier)) {
                     dead = true;
+                    player.SendMessage("in lava");
                     break;
                 }
             }
@@ -192,17 +193,17 @@ public class ParkourGame(ParkourMap map) {
         Respawn(player);
     }
     
-    private static Vec3<int>[] GetPlayerCollidingBlocks(PlayerEntity player) {
+    private static Vec3<int>[] GetPlayerCollidingBlocks(PlayerEntity player, Vec3<double> pos) {
         HashSet<Vec3<int>> blocks = [];
 
         double playerX = player.BoundingBox.Size.X;
         double playerZ = player.BoundingBox.Size.Z;
         
         // add all 4 corners
-        blocks.Add(new Vec3<int>((int)Math.Floor(player.Position.X), (int)Math.Floor(player.Position.Y), (int)Math.Floor(player.Position.Z)));
-        blocks.Add(new Vec3<int>((int)Math.Floor(player.Position.X + playerX), (int)Math.Floor(player.Position.Y), (int)Math.Floor(player.Position.Z)));
-        blocks.Add(new Vec3<int>((int)Math.Floor(player.Position.X), (int)Math.Floor(player.Position.Y), (int)Math.Floor(player.Position.Z + playerZ)));
-        blocks.Add(new Vec3<int>((int)Math.Floor(player.Position.X + playerX), (int)Math.Floor(player.Position.Y), (int)Math.Floor(player.Position.Z + playerZ)));
+        blocks.Add(new Vec3<int>((int)Math.Floor(pos.X), (int)Math.Floor(pos.Y), (int)Math.Floor(pos.Z)));
+        blocks.Add(new Vec3<int>((int)Math.Floor(pos.X + playerX), (int)Math.Floor(pos.Y), (int)Math.Floor(pos.Z)));
+        blocks.Add(new Vec3<int>((int)Math.Floor(pos.X), (int)Math.Floor(pos.Y), (int)Math.Floor(pos.Z + playerZ)));
+        blocks.Add(new Vec3<int>((int)Math.Floor(pos.X + playerX), (int)Math.Floor(pos.Y), (int)Math.Floor(pos.Z + playerZ)));
         
         return blocks.ToArray();
     }
