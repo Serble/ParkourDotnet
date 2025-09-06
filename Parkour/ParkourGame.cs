@@ -105,7 +105,6 @@ public class ParkourGame(ParkourMap map) {
                 IBlock type = World.GetBlock(block);
                 if (map.DeathBlocks.Contains(type.Identifier)) {
                     dead = true;
-                    player.SendMessage("in lava");
                     break;
                 }
             }
