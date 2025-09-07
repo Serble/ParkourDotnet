@@ -33,6 +33,14 @@ public class ParkourGame(ParkourMap map) {
             .Select(b => VanillaRegistry.Data.Blocks[b].ProtocolId)
             .ToArray();
 
+        World.Events.AddListener<PlayerPlaceBlockEvent>(e => {
+            e.Cancelled = true;
+        });
+
+        World.Events.AddListener<PlayerBreakBlockEvent>(e => {
+            e.Cancelled = true;
+        });
+
         World.Events.AddListener<PlayerEnteringWorldEvent>(e => {
             e.Player.Teleport(map.Spawn with {
                 Position = map.Spawn.Position + new Vec3<double>(0, 2, 0)
