@@ -16,7 +16,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="MinecraftDotnet.ManagedServer" Version="0.0.1-dev.156" />
+      <PackageReference Include="MinecraftDotnet.ManagedServer" Version="0.0.1-dev.158" />
     </ItemGroup>
 
 </Project>
