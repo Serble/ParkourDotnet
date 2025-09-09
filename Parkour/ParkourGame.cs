@@ -10,6 +10,7 @@ using Minecraft.Data.Blocks;
 using Minecraft.Data.Generated;
 using Minecraft.Implementations.Tags;
 using Minecraft.Packets.Config.ClientBound;
+using Minecraft.Packets.Play.ClientBound;
 using Minecraft.Schemas;
 using Minecraft.Schemas.Shapes;
 using Minecraft.Schemas.Vec;
@@ -22,6 +23,7 @@ public class ParkourGame(ParkourMap map) {
     private static readonly Tag<int> CheckpointTag = new("parkour:current_checkpoint");
     private static readonly Tag<DateTime> JumpPadCooldownTag = new("parkour:jump_pad_cooldown");
     private static readonly Tag<Stopwatch> TimerTag = new("parkour:timer");
+    private static readonly Tag<bool> CanSeePlayersTag = new("parkour:can_see_players");
     
     public World World { get; private set; } = null!;
     
@@ -42,6 +44,19 @@ public class ParkourGame(ParkourMap map) {
         });
 
         World.Events.AddListener<PlayerEnteringWorldEvent>(e => {
+            e.Player.ViewableRule = p => p.GetTagOrDefault(CanSeePlayersTag, true);
+            
+            e.Player.SendPacket(ClientBoundUpdateTeamsPacket.CreateTeam(
+                "parkour", 
+                TextComponent.Text(""), 
+                ClientBoundUpdateTeamsPacket.FriendlyFlag.AllowFriendlyFire,
+                ClientBoundUpdateTeamsPacket.NameTagVisibility.Always,
+                ClientBoundUpdateTeamsPacket.CollisionRule.Never,
+                ClientBoundUpdateTeamsPacket.TeamColor.White,
+                TextComponent.Text(""), 
+                TextComponent.Text(""), 
+                [e.Player.Name]));
+            
             e.Player.Teleport(map.Spawn with {
                 Position = map.Spawn.Position + new Vec3<double>(0, 2, 0)
             });
@@ -213,5 +228,10 @@ public class ParkourGame(ParkourMap map) {
         blocks.Add(new Vec3<int>((int)Math.Floor(pos.X + playerX), (int)Math.Floor(pos.Y), (int)Math.Floor(pos.Z + playerZ)));
         
         return blocks.ToArray();
+    }
+
+    public static void SetPlayerVisibility(PlayerEntity player, bool value) {
+        player.SetTag(CanSeePlayersTag, value);
+        player.RefreshVisibleEntities();
     }
 }
